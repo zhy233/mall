@@ -1,5 +1,6 @@
 package com.macro.mall.service;
 
+import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dto.*;
 import com.macro.mall.model.OmsOrder;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,4 +56,16 @@ public interface OmsOrderService {
      */
     @Transactional
     int updateNote(Long id, String note, Integer status);
+
+    /**
+     * 查询订单导出数据
+     * Create by zhuyong on 2019/7/21
+     */
+    List<OmsOrderExportResult> orderExport(List<Long> orderIds) throws Exception;
+
+    /**
+     * 员工订单统计
+     * Create by zhuyong on 2019/7/23
+     */
+    CommonResult getOrderStatistic();
 }

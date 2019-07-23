@@ -4,13 +4,18 @@ import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dto.*;
 import com.macro.mall.model.OmsOrder;
+import com.macro.mall.service.ExcelService;
 import com.macro.mall.service.OmsOrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -23,6 +28,9 @@ import java.util.List;
 public class OmsOrderController {
     @Autowired
     private OmsOrderService orderService;
+
+    @Autowired
+    private ExcelService excelService;
 
     @ApiOperation("查询订单")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
@@ -109,4 +117,38 @@ public class OmsOrderController {
         }
         return CommonResult.failed();
     }
+
+    //这个方法使用swagger测试有问题，建议使用postman测试
+    @ApiOperation(value = "导出订单列表")
+    @RequestMapping(value = "/export", method = RequestMethod.POST)
+    public void orderExport(@RequestParam List<Long> orderIds, HttpServletResponse response) throws Exception {
+        response.setContentType("application/vnd.ms-excel;charset=UTF-8");
+        String filename = "Order_export.xlsx";
+        //双重解码、防止乱码
+        filename = URLEncoder.encode(filename, "UTF-8");
+        response.setIntHeader("download-status", 1);
+        response.addHeader("download-filename", filename);
+        response.setHeader("download-message","订单导出成功");
+        try {
+            response.addHeader("Content-Disposition", "attachment;filename=" + filename);
+            OutputStream outputStream = response.getOutputStream();
+            List<OmsOrderExportResult> orderList = orderService.orderExport(orderIds);
+            SXSSFWorkbook workbook = excelService.exportOrder(orderList);
+            workbook.write(outputStream);
+            outputStream.flush();
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setIntHeader("download-status", 0);
+            response.setHeader("download-message","订单导出异常");
+        }
+    }
+
+    @ApiOperation("员工订单统计")
+    @RequestMapping(value = "/getOrderStatistic", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult getOrderStatistic() {
+        return CommonResult.success(orderService.getOrderStatistic());
+    }
+
 }

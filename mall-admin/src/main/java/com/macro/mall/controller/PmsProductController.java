@@ -152,4 +152,13 @@ public class PmsProductController {
             return CommonResult.failed();
         }
     }
+
+    @ApiOperation("生成商品码(给当前所有客服)(作废)")
+    @RequestMapping(value = "/createProductCodeForAll",method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult createProductCodeForAll(@RequestParam("商品id") Long productId){
+        return  productService.createProductCodeForAll(productId);
+    }
+
+
 }

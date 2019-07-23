@@ -312,7 +312,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     /**
      * 生成18位订单编号:8位日期+2位平台号码+2位支付方式+6位以上自增id
      */
-    private String generateOrderSn(OmsOrder order) {
+    public String generateOrderSn(OmsOrder order) {
         StringBuilder sb = new StringBuilder();
         String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
         String key = REDIS_KEY_PREFIX_ORDER_ID + date;

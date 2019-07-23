@@ -2915,6 +2915,66 @@ public class OmsOrderExample {
             addCriterion("modify_time not between", value1, value2, "modifyTime");
             return (Criteria) this;
         }
+
+        public Criteria andEmployeeIdIsNull() {
+            addCriterion("employee_id is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andEmployeeIdIsNotNull() {
+            addCriterion("employee_id is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andEmployeeIdEqualTo(Long value) {
+            addCriterion("employee_id =", value, "employeeId");
+            return (Criteria) this;
+        }
+
+        public Criteria andEmployeeIdNotEqualTo(Long value) {
+            addCriterion("employee_id <>", value, "employeeId");
+            return (Criteria) this;
+        }
+
+        public Criteria andEmployeeIdGreaterThan(Long value) {
+            addCriterion("employee_id >", value, "employeeId");
+            return (Criteria) this;
+        }
+
+        public Criteria andEmployeeIdGreaterThanOrEqualTo(Long value) {
+            addCriterion("employee_id >=", value, "employeeId");
+            return (Criteria) this;
+        }
+
+        public Criteria andEmployeeIdLessThan(Long value) {
+            addCriterion("employee_id <", value, "employeeId");
+            return (Criteria) this;
+        }
+
+        public Criteria andEmployeeIdLessThanOrEqualTo(Long value) {
+            addCriterion("employee_id <=", value, "employeeId");
+            return (Criteria) this;
+        }
+
+        public Criteria andEmployeeIdIn(List<Long> values) {
+            addCriterion("employee_id in", values, "employeeId");
+            return (Criteria) this;
+        }
+
+        public Criteria andEmployeeIdNotIn(List<Long> values) {
+            addCriterion("employee_id not in", values, "employeeId");
+            return (Criteria) this;
+        }
+
+        public Criteria andEmployeeIdBetween(Long value1, Long value2) {
+            addCriterion("employee_id between", value1, value2, "employeeId");
+            return (Criteria) this;
+        }
+
+        public Criteria andEmployeeIdNotBetween(Long value1, Long value2) {
+            addCriterion("employee_id not between", value1, value2, "employeeId");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {

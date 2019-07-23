@@ -1,6 +1,8 @@
 package com.macro.mall.service.impl;
 
 import com.github.pagehelper.PageHelper;
+import com.macro.mall.common.api.CommonResult;
+import com.macro.mall.config.OssConfig;
 import com.macro.mall.dao.*;
 import com.macro.mall.dto.PmsProductParam;
 import com.macro.mall.dto.PmsProductQueryParam;
@@ -8,19 +10,17 @@ import com.macro.mall.dto.PmsProductResult;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
 import com.macro.mall.service.PmsProductService;
-import io.swagger.annotations.Example;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 商品管理Service实现类
@@ -63,6 +63,22 @@ public class PmsProductServiceImpl implements PmsProductService {
     private PmsProductDao productDao;
     @Autowired
     private PmsProductVertifyRecordDao productVertifyRecordDao;
+    @Autowired
+    private DmsDomainSettingMapper domainSettingMapper;
+    @Autowired
+    private EmsEmployeeMapper emsEmployeeMapper;
+    @Autowired
+    private PmsProductQrcodeMapper productQrcodeMapper;
+    @Autowired
+    private OssConfig ossConfig;
+
+
+    @Value("${aliyun.oss.bucketName}")
+    private String ALIYUN_OSS_BUCKET_NAME;
+    @Value("${aliyun.oss.endpoint}")
+    private String ALIYUN_OSS_ENDPOINT;
+    @Value("${aliyun.oss.dir.prefix}")
+    private String ALIYUN_OSS_DIR_PREFIX;
 
     @Override
     public int create(PmsProductParam productParam) {
@@ -258,6 +274,30 @@ public class PmsProductServiceImpl implements PmsProductService {
             productExample.or().andDeleteStatusEqualTo(0).andProductSnLike("%" + keyword + "%");
         }
         return productMapper.selectByExample(productExample);
+    }
+
+    @Override
+    public CommonResult createProductCodeForAll(Long productId) {
+        DmsDomainSetting setting = domainSettingMapper.selectByPrimaryKey(1l);
+        if (setting == null) {
+            return CommonResult.failed("请先配置入口域名!");
+        }
+        EmsEmployeeExample employeeExample = new EmsEmployeeExample();
+        employeeExample.createCriteria().andStatusEqualTo(0);
+        //获取在职员工
+        List<EmsEmployee> employees = emsEmployeeMapper.selectByExample(employeeExample);
+
+        Map<Long, String> imageMap = new HashMap<>();
+        for (EmsEmployee employee : employees) {
+            try {
+                String text = "http://" + setting.getMainDomain() + "/#/entry?employeeId=" + employee.getId() + "&productId=" + productId;
+                imageMap.put(employee.getId(),text);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return CommonResult.success(imageMap);
     }
 
     /**

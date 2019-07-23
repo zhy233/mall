@@ -46,7 +46,7 @@ public class OmsOrder implements Serializable {
     @ApiModelProperty(value = "支付方式：0->未支付；1->支付宝；2->微信")
     private Integer payType;
 
-    @ApiModelProperty(value = "订单来源：0->PC订单；1->app订单")
+    @ApiModelProperty(value = "订单来源：0->PC订单；1->app订单 2->微信H5订单")
     private Integer sourceType;
 
     @ApiModelProperty(value = "订单状态：0->待付款；1->待发货；2->已发货；3->已完成；4->已关闭；5->无效订单")
@@ -135,6 +135,9 @@ public class OmsOrder implements Serializable {
 
     @ApiModelProperty(value = "修改时间")
     private Date modifyTime;
+
+    @ApiModelProperty(value = "员工id")
+    private Long employeeId;
 
     private static final long serialVersionUID = 1L;
 
@@ -490,6 +493,14 @@ public class OmsOrder implements Serializable {
         this.modifyTime = modifyTime;
     }
 
+    public Long getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(Long employeeId) {
+        this.employeeId = employeeId;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -540,6 +551,7 @@ public class OmsOrder implements Serializable {
         sb.append(", receiveTime=").append(receiveTime);
         sb.append(", commentTime=").append(commentTime);
         sb.append(", modifyTime=").append(modifyTime);
+        sb.append(", employeeId=").append(employeeId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

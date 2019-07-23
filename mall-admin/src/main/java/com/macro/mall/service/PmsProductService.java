@@ -1,5 +1,6 @@
 package com.macro.mall.service;
 
+import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dto.PmsProductParam;
 import com.macro.mall.dto.PmsProductQueryParam;
 import com.macro.mall.dto.PmsProductResult;
@@ -70,4 +71,10 @@ public interface PmsProductService {
      * 根据商品名称或者货号模糊查询
      */
     List<PmsProduct> list(String keyword);
+
+    /**
+     * 生成商品码(给当前所有客服)
+     * Create by zhuyong on 2019/7/20
+     */
+    CommonResult createProductCodeForAll(Long productId);
 }

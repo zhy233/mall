@@ -25,3 +25,20 @@ rabbitmq:
     name:
       cancelOrder: cancelOrderQueue
 
+
+# 第三方支付
+pay-info:
+  merchantNo: 2000078
+  notifyUrl: http://47.52.130.84:8085/onePage/paySuccess
+  signKey: pybYm4VYFAN76xVUDkDZgG7yfff6rBPv045AZFNhsEzpAbe117
+
+# ISPAY支付
+is-pay:
+  payId: 12672
+  payChannel: wxpay
+  Notify_url: http://47.52.130.84:8085/onePage/isPaySuccess
+  payKey: 087fa038a57f2192023c44eb77e14620
+
+
+
+
