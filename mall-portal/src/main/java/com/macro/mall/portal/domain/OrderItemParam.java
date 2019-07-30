@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
  * 提交的订单项
  * Create by zhuyong on 2019/7/18
  */
-public class OrderItemParam{
+public class    OrderItemParam{
     @ApiModelProperty("商品id")
     private Long productId; //商品id
     @ApiModelProperty("购买数量")

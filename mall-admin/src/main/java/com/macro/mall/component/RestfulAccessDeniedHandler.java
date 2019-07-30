@@ -21,6 +21,7 @@ public class RestfulAccessDeniedHandler implements AccessDeniedHandler{
     public void handle(HttpServletRequest request,
                        HttpServletResponse response,
                        AccessDeniedException e) throws IOException, ServletException {
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>RestfulAccessDeniedHandler>>>>>>>>>>>>>>>>.");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
         response.getWriter().println(JSONUtil.parse(CommonResult.forbidden(e.getMessage())));

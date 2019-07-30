@@ -32,3 +32,9 @@ logging:
     com.macro.mall: debug
 #  file: demo_log.log #配置日志生成路径
 #  path: /var/logs #配置日志文件名称
+
+# 久久微信支付
+jiujiu-pay:
+  merchant_id: 10622
+  s_key: B77D48D61A7C48F2A5F72DD8935C1F08
+  j_notify_url: http://47.52.130.84:8085/onePage/jiujiuPaySuccess

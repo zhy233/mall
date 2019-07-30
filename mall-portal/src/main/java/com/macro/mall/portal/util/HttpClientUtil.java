@@ -11,10 +11,12 @@ import com.macro.mall.portal.component.Namevaluepairforhttp;
 import net.sf.json.JSONObject;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
@@ -24,6 +26,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -477,4 +480,125 @@ public class HttpClientUtil {
 		return result;
 	}
 
+    public static String doPostForm(String url, Map<Object,Object> map,String encoding) throws ParseException, IOException{
+        String body = "";
+        //创建httpclient对象
+        CloseableHttpClient client = HttpClients.createDefault();
+        //创建post方式请求对象
+        HttpPost httpPost = new HttpPost(url);
+
+        List<BasicNameValuePair> nvps = new ArrayList<BasicNameValuePair>();
+        if(map!=null){
+            for (Entry<Object, Object> entry : map.entrySet()) {
+                nvps.add(new BasicNameValuePair(entry.getKey().toString(), entry.getValue().toString()));
+            }
+        }
+        //设置参数到请求对象中
+        httpPost.setEntity(new UrlEncodedFormEntity(nvps, encoding));
+
+        //设置连接超时时间 为3秒
+        RequestConfig config = RequestConfig.custom().setConnectTimeout(3000).setConnectionRequestTimeout(3000).setSocketTimeout(5000).build();
+        httpPost.setConfig(config);
+        System.out.println("请求地址："+url);
+        System.out.println("请求参数："+nvps.toString());
+
+        //1.表单方式提交数据   简单举例，上面给出的是map参数
+//                List<BasicNameValuePair> pairList = new ArrayList<BasicNameValuePair>();
+//                for(Map.Entry<String,String> entry : map.entrySet()){
+//                    pairList.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+//                }
+//
+//                httpPost.setEntity(new UrlEncodedFormEntity(pairList, "utf-8"));
+
+        //2.json方式传值提交
+        //        JSONObject jsonParam = new JSONObject();
+        //        jsonParam.put("name", "admin");
+        //        jsonParam.put("pass", "123456");
+        //        StringEntity entity = new StringEntity(jsonParam.toString(), "utf-8");// 解决中文乱码问题
+        //        entity.setContentEncoding("UTF-8");
+        //        entity.setContentType("application/json");
+        //        httpPost.setEntity(entity);
+
+        //可以设置header信息 此方法不设置
+        //指定报文头【Content-type】、【User-Agent】
+//		httpPost.setHeader("Accept", "*/*");
+//		httpPost.setHeader("Connection", "Keep-Alive");
+//		httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");
+//		httpPost.setHeader("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+
+        //执行请求操作，并拿到结果（同步阻塞）
+        CloseableHttpResponse response = client.execute(httpPost);
+        //获取结果实体
+        HttpEntity entity = response.getEntity();
+        if (entity != null) {
+            //按指定编码转换结果实体为String类型
+            body = EntityUtils.toString(entity, encoding);
+        }
+        EntityUtils.consume(entity);
+        //释放链接
+        response.close();
+        return body;
+    }
+
+
+
+	public static String doPostForm2(String url, Map<Object,Object> map,String encoding) throws ParseException, IOException{
+		String body = "";
+		//创建httpclient对象
+		CloseableHttpClient client = HttpClients.createDefault();
+		//创建post方式请求对象
+		HttpPost httpPost = new HttpPost(url);
+
+		List<BasicNameValuePair> nvps = new ArrayList<BasicNameValuePair>();
+		if(map!=null){
+			for (Entry<Object, Object> entry : map.entrySet()) {
+				nvps.add(new BasicNameValuePair(entry.getKey().toString(), entry.getValue().toString()));
+			}
+		}
+		//设置参数到请求对象中
+		httpPost.setEntity(new UrlEncodedFormEntity(nvps, encoding));
+
+		//设置连接超时时间 为3秒
+		RequestConfig config = RequestConfig.custom().setConnectTimeout(3000).setConnectionRequestTimeout(3000).setSocketTimeout(5000).build();
+		httpPost.setConfig(config);
+		System.out.println("请求地址："+url);
+		System.out.println("请求参数："+nvps.toString());
+
+		//1.表单方式提交数据   简单举例，上面给出的是map参数
+//                List<BasicNameValuePair> pairList = new ArrayList<BasicNameValuePair>();
+//                for(Map.Entry<String,String> entry : map.entrySet()){
+//                    pairList.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+//                }
+//
+//                httpPost.setEntity(new UrlEncodedFormEntity(pairList, "utf-8"));
+
+		//2.json方式传值提交
+		//        JSONObject jsonParam = new JSONObject();
+		//        jsonParam.put("name", "admin");
+		//        jsonParam.put("pass", "123456");
+		//        StringEntity entity = new StringEntity(jsonParam.toString(), "utf-8");// 解决中文乱码问题
+		//        entity.setContentEncoding("UTF-8");
+		//        entity.setContentType("application/json");
+		//        httpPost.setEntity(entity);
+
+		//可以设置header信息 此方法不设置
+		//指定报文头【Content-type】、【User-Agent】
+		httpPost.setHeader("Accept", "*/*");
+		httpPost.setHeader("Connection", "Keep-Alive");
+		httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");
+		httpPost.setHeader("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+
+		//执行请求操作，并拿到结果（同步阻塞）
+		CloseableHttpResponse response = client.execute(httpPost);
+		//获取结果实体
+		HttpEntity entity = response.getEntity();
+		if (entity != null) {
+			//按指定编码转换结果实体为String类型
+			body = EntityUtils.toString(entity, encoding);
+		}
+		EntityUtils.consume(entity);
+		//释放链接
+		response.close();
+		return body;
+	}
 }

@@ -16,6 +16,7 @@ import java.io.IOException;
 public class GoAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>RestfulAccessDeniedHandler>>>>>>>>>>>>>>>>.");
         response.setHeader("Content-Type", "application/json;charset=utf-8");
         response.getWriter().print(JSONUtil.parse(CommonResult.forbidden(authException.getMessage())));
         response.getWriter().flush();

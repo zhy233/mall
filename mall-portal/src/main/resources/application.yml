@@ -4,8 +4,8 @@ spring:
 
 mybatis:
   mapper-locations:
-    - classpath:dao/*.xml
-    - classpath*:com/**/mapper/*.xml
+  - classpath:dao/*.xml
+  - classpath*:com/**/mapper/*.xml
 
 http:
   port: 8085 # http服务端口
@@ -35,9 +35,17 @@ pay-info:
 # ISPAY支付
 is-pay:
   payId: 12672
-  payChannel: wxpay
+  payChannel: wxgzhpay
   Notify_url: http://47.52.130.84:8085/onePage/isPaySuccess
   payKey: 087fa038a57f2192023c44eb77e14620
+  queryUrl: https://pay11.ispay.cn/core/api/request/query/
+
+# 久久微信支付
+jiujiu-pay:
+  merchant_id: 10622
+  s_key: B77D48D61A7C48F2A5F72DD8935C1F08
+  j_notify_url: http://47.52.130.84:8085/onePage/jiujiuPaySuccess
+
 
 
 

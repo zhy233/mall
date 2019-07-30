@@ -10,6 +10,15 @@ public class OrderStatisticResult {
      private Long todayOrderNum; //今日订单总数
      private Integer todayProductNum; //今日商品总数
      private Long allOrderNum; //员工订单总数
+     private Integer todayVisitTimes; //今天被访问次数
+
+    public Integer getTodayVisitTimes() {
+        return todayVisitTimes;
+    }
+
+    public void setTodayVisitTimes(Integer todayVisitTimes) {
+        this.todayVisitTimes = todayVisitTimes;
+    }
 
     public Long getEmployeeId() {
         return employeeId;

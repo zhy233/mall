@@ -176,4 +176,14 @@ public class UmsAdminController {
         List<UmsPermission> permissionList = adminService.getPermissionList(adminId);
         return CommonResult.success(permissionList);
     }
+
+
+    @ApiOperation("修改密码")
+    @RequestMapping(value = "/passwd/reset", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult resetPasswd(@RequestParam Long adminId,
+                                    @RequestParam String password,
+                                    @RequestParam String newPassword) {
+        return CommonResult.success(adminService.resetPasswd(adminId,password,newPassword));
+    }
 }

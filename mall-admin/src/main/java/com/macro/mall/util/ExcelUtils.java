@@ -24,9 +24,9 @@ import java.util.Objects;
  * Created by zzqno on 2016-12-14.
  */
 public class ExcelUtils {
-    public static String orderTitlescheme[]={"序号","编号","订单编号","提交时间","用户账号","订单金额","支付方式","订单来源","订单状态","支付时间"};
-    public static String orderPropertiescheme[]={"id","orderSn","submitTime","memberUsername","payAmount","payTypeValue","sourceTypeValue","orderStatus","payTime"};
-    public static String orderDigit[]={"#,#0","#,#0","","","","#,#0.00","","","",""};
+    public static String orderTitlescheme[]={"序号","编号","订单编号","提交时间","用户账号","收货人姓名","收货人电话","收货人邮编","商品属性","省份/直辖市","城市","区","详细地址","订单备注","支付方式","订单来源","订单状态","支付时间"};
+    public static String orderPropertiescheme[]={"id","orderSn","submitTime","memberUsername","receiverName","receiverPhone","receiverPostCode","productAttr","receiverProvince","receiverCity","receiverRegion","receiverDetailAddress","note","payTypeValue","sourceTypeValue","orderStatus","payTime"};
+    public static String orderDigit[]={"#,#0","#,#0","","","","","","","","","","","","","","","",""};
 
     private static HSSFWorkbook workbook = null;
 

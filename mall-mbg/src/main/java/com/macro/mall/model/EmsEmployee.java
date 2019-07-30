@@ -5,23 +5,23 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class EmsEmployee implements Serializable {
-    @ApiModelProperty(value = "员工id")
+    @ApiModelProperty(value = "å‘˜å·¥id")
     private Long id;
 
     private String nickName;
 
     private String loginName;
 
-    @ApiModelProperty(value = "员工级别: 1: 组员 2:组长")
+    @ApiModelProperty(value = "å‘˜å·¥çº§åˆ«: 1: ç»„å‘˜ 2:ç»„é•¿")
     private Integer employeeLevel;
 
-    @ApiModelProperty(value = "组长id")
+    @ApiModelProperty(value = "ç»„é•¿id")
     private Long groupLeaderId;
 
-    @ApiModelProperty(value = "创建时间")
+    @ApiModelProperty(value = "åˆ›å»ºæ—¶é—´")
     private Date createTime;
 
-    @ApiModelProperty(value = "状态: 0：正常 1: 删除")
+    @ApiModelProperty(value = "çŠ¶æ€: 0ï¼šæ­£å¸¸ 1: åˆ é™¤")
     private Integer status;
 
     private static final long serialVersionUID = 1L;

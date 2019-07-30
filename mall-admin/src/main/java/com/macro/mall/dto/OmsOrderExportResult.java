@@ -12,6 +12,15 @@ public class OmsOrderExportResult extends OmsOrder {
     private String sourceTypeValue;
     private String orderStatus;
     private String payTime;
+    private String productAttr;
+
+    public String getProductAttr() {
+        return productAttr;
+    }
+
+    public void setProductAttr(String productAttr) {
+        this.productAttr = productAttr;
+    }
 
     public String getSubmitTime() {
         return submitTime;

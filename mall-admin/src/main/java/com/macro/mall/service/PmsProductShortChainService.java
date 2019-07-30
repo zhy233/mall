@@ -11,4 +11,6 @@ public interface PmsProductShortChainService {
     CommonResult createShortChain(Long employeeId, Long productId);
 
     CommonResult getShortChainList(Long productId);
+
+    CommonResult getMainDomainUrl(Long valueOf, Long valueOf1);
 }

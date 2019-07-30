@@ -23,4 +23,8 @@ public class OmsOrderQueryParam {
     private Integer sourceType;
     @ApiModelProperty(value = "订单提交时间")
     private String createTime;
+    @ApiModelProperty(value = "支付状态: 0->未支付；1->已支付")
+    private Integer payFlag;
+    @ApiModelProperty(value = "员工Id")
+    private Long employeeId;
 }

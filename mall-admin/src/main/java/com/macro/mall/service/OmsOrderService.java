@@ -5,7 +5,9 @@ import com.macro.mall.dto.*;
 import com.macro.mall.model.OmsOrder;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 订单管理Service
@@ -68,4 +70,9 @@ public interface OmsOrderService {
      * Create by zhuyong on 2019/7/23
      */
     CommonResult getOrderStatistic();
+
+    Map<String, Object> jiujiuPayWxPay(HttpServletRequest request) throws Exception;
+
+    Map<String, Object> jiujiuPaySuccess(HttpServletRequest request);
+
 }

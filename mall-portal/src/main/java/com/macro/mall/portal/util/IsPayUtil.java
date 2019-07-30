@@ -19,6 +19,7 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -42,21 +43,56 @@ public class IsPayUtil {
                 sbkey.append(v);
             }
         }
-        //System.out.println("字符串:"+sb.toString());
+        System.out.println("key字符串:"+sb.toString());
         sbkey = sbkey.append(key);
-        System.out.println("字符串:" + sbkey.toString());
+        System.out.println("拼接value:" + sbkey.toString());
         //MD5加密,结果转换为大写字符
-        String sign = encrypt32(sbkey.toString());
+        String sign = MD5Utils.getMD5(sbkey.toString());
         System.out.println("MD5加密值:" + sign);
         return sign;
     }
+    public static String md5(String str){
+        String result = "";
+
+        MessageDigest md5 = null;
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+            md5.update((str).getBytes("UTF-8"));
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        byte b[] = md5.digest();
+
+        int i;
+        StringBuffer buf = new StringBuffer("");
+
+        for(int offset=0; offset<b.length; offset++){
+            i = b[offset];
+            if(i<0){
+                i+=256;
+            }
+            if(i<16){
+                buf.append("0");
+            }
+            buf.append(Integer.toHexString(i));
+        }
+
+        result = buf.toString();
+        System.out.println("result = " + result);
+        return result;
+    }
+
+
 
     //MD5 32位小写加密
     public static String encrypt32(String encryptStr) {
         MessageDigest md5;
         try {
             md5 = MessageDigest.getInstance("MD5");
-            byte[] md5Bytes = md5.digest(encryptStr.getBytes());
+            byte[] md5Bytes = md5.digest(encryptStr.getBytes("UTF-8"));
             StringBuffer hexValue = new StringBuffer();
             for (int i = 0; i < md5Bytes.length; i++) {
                 int val = ((int) md5Bytes[i]) & 0xff;
@@ -71,25 +107,31 @@ public class IsPayUtil {
         return encryptStr;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         SortedMap<Object, Object> parameters = new TreeMap<>();
-        parameters.put("payId", 12672);
-        parameters.put("payChannel", "wxpay");
+        parameters.put("payId", 10000);
+        parameters.put("payChannel", "alipay");
         parameters.put("Subject", "测试标题");
-        parameters.put("Money", 1);
-        parameters.put("orderNumber", "201907230202000001");
+        parameters.put("Money", 500);
+        parameters.put("orderNumber", "201702080118441263011007");
         parameters.put("attachData", "test");
-        String sign = generate_sign(parameters, "087fa038a57f2192023c44eb77e14620");
-        parameters.put("Sign",sign);
-        parameters.put("Notify_url", "http://47.52.130.84:8085/onePage/isPaySuccess");
-        parameters.put("Return_url", "http://www.weixinzishan.cn/#/paySucc");
+        parameters.put("Notify_url", "https://www.ispay.cn/notify/");
+        parameters.put("Return_url", "https://www.ispay.cn/return/");
+        String sign = generate_sign(parameters, "");
+        System.out.println("签名:"+ sign);
+//        parameters.put("Sign",sign);
+
 //        parameters.put("payKey", "087fa038a57f2192023c44eb77e14620");
-        JSONObject jsonObject = JSONObject.fromObject(parameters);
-        String s = jsonObject.toString();
-        System.out.println("请求:" + s);
-        //统一下单
-        String result = doHttpsPost("https://pay88.ispay.cn/core/api/request/pay/", jsonObject);
-        System.out.println("结果:" + result);
+//
+//        Map<Object,Object> stringMap = new HashMap<>();
+//        stringMap.putAll(parameters);
+//
+////        JSONObject jsonObject = JSONObject.fromObject(parameters);
+////        String s = jsonObject.toString();
+////        System.out.println("请求:" + s);
+//        //统一下单
+//        String result = HttpClientUtil.doPostForm("https://pay11.ispay.cn/core/api/request/pay/", stringMap,"UTF-8");
+//        System.out.println("结果:" + result);
     }
 
 
@@ -97,77 +139,42 @@ public class IsPayUtil {
         try {
 
             //https 请求忽略证书
-
             SSLContextBuilder builder = new SSLContextBuilder();
-
             builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
-
             SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(builder.build(), NoopHostnameVerifier.INSTANCE);
-
             Registry registry = RegistryBuilder.create()
-
                     .register("http", new PlainConnectionSocketFactory())
-
                     .register("https", sslConnectionSocketFactory)
-
                     .build();
 
             PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry);
-
             cm.setMaxTotal(100);
-
             CloseableHttpClient httpClient = HttpClients.custom()
-
                     .setSSLSocketFactory(sslConnectionSocketFactory)
-
                     .setConnectionManager(cm)
-
                     .build();
-
             //发送post请求
-
             HttpPost method = new HttpPost(url);
-
             //处理中文乱码问题
-
             StringEntity entity = new StringEntity(paramIn.toString(), "utf-8");
-
             entity.setContentEncoding("UTF-8");
-
             entity.setContentType("application/json");
-
             method.setEntity(entity);
-
             //发送请求
-
             HttpResponse result = httpClient.execute(method);
-
             //请求结束，返回结果
-
             String resData = EntityUtils.toString(result.getEntity());
-
             System.out.println("RENWOXING result:" + resData);
-
             //得到返回结果的j'son格式
-
 //            JSONObject resJson = JSONObject.fromObject(resData);
-
         } catch (UnsupportedEncodingException e) {
-
             e.printStackTrace();
-
         } catch (org.apache.http.ParseException e) {
-
             e.printStackTrace();
-
         } catch (IOException e) {
-
             e.printStackTrace();
-
         } catch (Exception e) {
-
             e.printStackTrace();
-
         }
         return null;
     }

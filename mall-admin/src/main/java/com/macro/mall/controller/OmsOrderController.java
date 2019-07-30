@@ -121,7 +121,7 @@ public class OmsOrderController {
     //这个方法使用swagger测试有问题，建议使用postman测试
     @ApiOperation(value = "导出订单列表")
     @RequestMapping(value = "/export", method = RequestMethod.POST)
-    public void orderExport(@RequestParam List<Long> orderIds, HttpServletResponse response) throws Exception {
+    public void orderExport(@RequestParam("orderIds") List<Long> orderIds, HttpServletResponse response) throws Exception {
         response.setContentType("application/vnd.ms-excel;charset=UTF-8");
         String filename = "Order_export.xlsx";
         //双重解码、防止乱码

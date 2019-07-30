@@ -1,6 +1,7 @@
 package com.macro.mall.service.impl;
 
 import com.github.pagehelper.PageHelper;
+import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dao.UmsAdminPermissionRelationDao;
 import com.macro.mall.dao.UmsAdminRoleRelationDao;
 import com.macro.mall.dto.UmsAdminParam;
@@ -248,5 +249,25 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     @Override
     public List<UmsPermission> getPermissionList(Long adminId) {
         return adminRoleRelationDao.getPermissionList(adminId);
+    }
+
+    @Override
+    public CommonResult resetPasswd(Long adminId, String password, String newPassword) {
+        UmsAdmin umsAdmin = adminMapper.selectByPrimaryKey(adminId);
+        password = passwordEncoder.encode(password);
+
+        if(umsAdmin != null){
+            String oldPassword = umsAdmin.getPassword();
+            if(!passwordEncoder.matches(password,oldPassword)){
+                throw new BadCredentialsException("密码不正确");
+            }
+            //更新密码
+            UmsAdmin record = new UmsAdmin();
+            record.setId(adminId);
+            record.setPassword(passwordEncoder.encode(newPassword));
+            int i = adminMapper.updateByPrimaryKeySelective(record);
+            return CommonResult.success(i);
+        }
+        return CommonResult.failed();
     }
 }

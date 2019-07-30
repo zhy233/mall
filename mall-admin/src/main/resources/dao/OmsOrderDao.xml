@@ -32,6 +32,17 @@
             OR receiver_phone LIKE concat("%",#{queryParam.receiverKeyword},"%")
             )
         </if>
+        <if test="queryParam.payFlag!=null">
+            <if test='queryParam.payFlag == "0"'>
+                AND `status` = 0
+            </if>
+            <if test='queryParam.payFlag == "1"'>
+                AND `status` not in (0,5)
+            </if>
+        </if>
+        <if test="queryParam.employeeId!=null">
+            AND employee_id = #{queryParam.employeeId}
+        </if>
     </select>
     <update id="delivery">
         UPDATE oms_order

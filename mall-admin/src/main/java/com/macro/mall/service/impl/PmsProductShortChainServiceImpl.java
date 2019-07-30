@@ -9,10 +9,12 @@ import com.macro.mall.model.*;
 import com.macro.mall.service.PmsProductShortChainService;
 import com.macro.mall.util.HttpClientUtil;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -60,18 +62,21 @@ public class PmsProductShortChainServiceImpl implements PmsProductShortChainServ
             if(text.equals(pmsProductShortChain.getLongChain())){
                 //入口域名不变
                 return CommonResult.success(pmsProductShortChain);
-            }
+            }else{}
             //更新短链
             String shortChain = getShortChain(text);
+            if(StringUtils.isEmpty(shortChain)) return CommonResult.failed("网络繁忙，请稍后再试");
             PmsProductShortChain updateShortChain = new PmsProductShortChain();
             updateShortChain.setId(pmsProductShortChain.getId());
             updateShortChain.setMainDomain(setting.getMainDomain());
+            updateShortChain.setLongChain(text);
             updateShortChain.setShortChain(shortChain);
             shortChainMapper.updateByPrimaryKeySelective(updateShortChain);
 
         }else{
             //生成短链
             String shortChain = getShortChain(text);
+            if(StringUtils.isEmpty(shortChain)) return CommonResult.failed("网络繁忙，请稍后再试");
             PmsProductShortChain insertShortChain = new PmsProductShortChain();
             insertShortChain.setEmployeeId(employeeId);
             insertShortChain.setProductId(productId);
@@ -94,6 +99,28 @@ public class PmsProductShortChainServiceImpl implements PmsProductShortChainServ
 
         return CommonResult.failed("短链生成失败");
     }
+
+
+    @Override
+    public CommonResult getMainDomainUrl(Long employeeId, Long productId) {
+        DmsDomainSetting setting = domainSettingMapper.selectByPrimaryKey(1l);
+        if (setting == null) {
+            return CommonResult.failed("请先配置入口域名!");
+        }
+
+        EmsEmployee employee = employeeMapper.selectByPrimaryKey(employeeId);
+        if(employee == null){
+            return CommonResult.failed("该员工不存在");
+        }
+
+        //拼接长链
+        String text = "http://" + setting.getMainDomain() + "/goods"
+                + "?employeeId=" + employeeId
+                + "&productId=" + productId;
+
+        return CommonResult.success(text);
+    }
+
 
     @Override
     public CommonResult getShortChainList(Long productId) {
@@ -118,7 +145,7 @@ public class PmsProductShortChainServiceImpl implements PmsProductShortChainServ
 
             PmsProductShortChain chain = new PmsProductShortChain();
             chain.setEmployeeId(employee.getId());
-            chain.setEmployeeName(employee.getLoginName());
+            chain.setEmployeeName(employee.getNickName());
             chain.setProductId(productId);
 
             if(shortChain != null){
@@ -136,21 +163,38 @@ public class PmsProductShortChainServiceImpl implements PmsProductShortChainServ
     }
 
     public String getShortChain(String text){
+        System.out.println("==========start get short chain===========");
         try{
 //            String params = "&token=28e43f2fc4993d416ac67327aa3514c3&long=" + text;
-            Map<String,String> params = new HashMap<>();
+            Map<Object,Object> params = new HashMap<>();
             params.put("token","28e43f2fc4993d416ac67327aa3514c3");
-            params.put("long",text);
-            String result = HttpClientUtil.post("http://baofeng.la/index.php?a=addon&m=url2",null, params);
+            params.put("long",URLEncoder.encode(text,"utf-8"));
+            //wxdwz
+            //String result = HttpClientUtil.doPostForm("http://baofeng.la/index.php?a=addon&m=url2",params, "UTF-8");
+
+            //String result = HttpClientUtil.doPostForm("http://baofeng.la/index.php?a=addon&m=wxdwz",params, "UTF-8");
+            String url = "http://baofeng.la/index.php?a=addon&m=wxdwz" +
+                    "&token=" +params.get("token")
+                    +"&long=" +params.get("long");
+
+            String result = HttpClientUtil.get(url);
+
+            if(StringUtils.isEmpty(result)){
+                //调用短码生成接口异常
+                System.out.println("=========params:"+ params.toString());
+                return "";
+            }
+
             JSONObject jsonObject = JSONObject.fromObject(result);
-            Integer ret_code = (Integer) jsonObject.get("ret_code");
+            System.out.println("========getShortChain:"+result);
+            Integer code = (Integer)jsonObject.get("ret_code");
+            int ret_code = code != null? code : -1;
             if (ret_code == 0) {
                 //获取到短链
                 return (String) jsonObject.get("short");
             }
         }catch (Exception e){
             e.printStackTrace();
-            throw new RuntimeException();
         }
         return null;
     }

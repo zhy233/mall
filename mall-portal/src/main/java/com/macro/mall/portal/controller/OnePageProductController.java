@@ -1,9 +1,11 @@
 package com.macro.mall.portal.controller;
 
 import com.macro.mall.common.api.CommonResult;
+import com.macro.mall.portal.component.OrderTaskThread;
 import com.macro.mall.portal.domain.*;
 import com.macro.mall.portal.service.OmsPortalOrderReturnApplyService;
 import com.macro.mall.portal.service.OnePageService;
+import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import net.sf.json.JSONObject;
@@ -11,9 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 单页电商营销controllr
@@ -32,10 +36,11 @@ public class OnePageProductController {
 
 
     @ApiOperation("单品页面显示")
-    @RequestMapping(value = "/content/{productId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/content/{productId}/{employeeId}", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult<OnePageProductResult> content(@PathVariable Long productId) {
+    public CommonResult<OnePageProductResult> content(@PathVariable Long productId, @PathVariable Long employeeId) {
         OnePageProductResult content = onePageService.content(productId);
+        onePageService.countVisitTimes(employeeId,productId);
         return CommonResult.success(content);
     }
 
@@ -89,12 +94,17 @@ public class OnePageProductController {
     }
 
     @ApiOperation("落地域名重定向")
-    @RequestMapping(value = "/redirect",method = RequestMethod.POST)
-    @ResponseBody
-    public CommonResult redirect(@RequestBody RedirectParam redirectParam,
+    @RequestMapping(value = "/redirect",method = {RequestMethod.POST,RequestMethod.GET})
+    public void redirect(HttpServletRequest request,
                          HttpServletResponse response) throws IOException {
-        String url = onePageService.getRedirectUrl(redirectParam.getEmployeeId(),redirectParam.getProductId());
-        return CommonResult.success(url);
+
+        Long employeeId = Long.valueOf(request.getParameter("employeeId"));
+        Long productId = Long.valueOf(request.getParameter("productId"));
+
+        String url = onePageService.getRedirectUrl(employeeId,productId);
+        response.setStatus(301);
+        response.setHeader( "Location", url);
+        response.setHeader( "Connection", "close" );
     }
 
 
@@ -111,20 +121,88 @@ public class OnePageProductController {
         return commonResult;
     }
 
-    @ApiOperation("ISPAY支付成功的回调")
-    @RequestMapping(value = "/isPaySuccess",method = RequestMethod.POST)
+    @ApiOperation("ISPAY统一下单参数")
+    @RequestMapping(value = "/getPayWxPayParams", method = RequestMethod.POST)
     @ResponseBody
-    public String isPaySuccess(@RequestBody IsPayCallBackParam callBackParam){
-        String orderNo = callBackParam.getOrderNumber();
+    public CommonResult getPayWxPayParams(@RequestBody IsPayParam payParam) {
+        CommonResult commonResult = onePageService.getPayWxPayParams(
+                payParam.getSubject(),
+                payParam.getOrderId(),
+                payParam.getAttachData(),
+                payParam.getOrderNumber(),
+                payParam.getReturn_url());
+        return commonResult;
+    }
 
-        String result = onePageService.verifyCallBackSign(callBackParam);
+
+    @ApiOperation("ISPAY支付成功的回调(作废)")
+    @RequestMapping(value = "/isPaySuccess", method = {RequestMethod.POST,RequestMethod.GET})
+    public String isPaySuccess(@RequestParam String payChannel, //返回 支付通道 代码
+                               @RequestParam Integer Money, //用户付款金额（单位分）
+                               @RequestParam String orderNumber, //商户自主生成的订单号
+                               @RequestParam String attachData, //商户自定义附加数据
+                               @RequestParam String callbackSign //回调签名 查看算法
+    ){
+
+        String result = onePageService.verifyCallBackSign(orderNumber,payChannel,Money,attachData,callbackSign);
         if("SUCCESS".equals(result)){
-            CommonResult commonResult = onePageService.paySuccess(orderNo);
-            System.out.println("isPaySuccess ==== orderNo:"+callBackParam.getOrderNumber());
+            CommonResult commonResult = onePageService.paySuccess(orderNumber);
+            System.out.println("isPaySuccess ==== orderNo:"+orderNumber);
             if(commonResult.getCode() != 200){
                 return null;
             }
         }
         return result;
     }
+
+    @ApiOperation("ISPAY支付前端回调")
+    @RequestMapping(value = "/queryForPay",method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult queryOrder(@RequestParam String orderNumber){
+        if(StringUtils.isNotEmpty(orderNumber)){
+            OrderTaskThread thread = new OrderTaskThread(onePageService);
+            thread.paySuccess(orderNumber);
+        }
+        return CommonResult.success(1);
+    }
+
+    @ApiOperation("久久微信支付")
+    @RequestMapping(value = "/jiujiuPayWxPay", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult jiujiuPayWxPay(HttpServletRequest request,HttpServletResponse response) {
+        try{
+            Map<String, Object> resultMap = onePageService.jiujiuPayWxPay(request);
+            return CommonResult.success(resultMap);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return CommonResult.failed();
+    }
+
+    @ApiOperation("久久微信支付成功的回调")
+    @RequestMapping(value = "/jiujiuPaySuccess")
+    public String jiujiuPaySuccess(HttpServletRequest request,HttpServletResponse response){
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>>久久微信支付成功的回调开始>>>>>>>>>>>>>>");
+        try{
+            Map<String, Object> resultMap = onePageService.jiujiuPaySuccess(request);
+            if(resultMap != null){
+                String out_trade_no = (String)resultMap.get("out_trade_no");
+                String trade_no = (String)resultMap.get("trade_no");
+                if(StringUtils.isNotEmpty(out_trade_no)){
+                    CommonResult commonResult = onePageService.paySuccessHandle(out_trade_no, trade_no);
+                    if(commonResult.getCode() != 200l){
+                        System.out.println(">>>>>>>>>>>>>>>>>>>>>>久久微信支付成功的回调失败>>>>>>>>>>>>>>");
+                       return "";
+                    }
+                }
+            }
+
+            return "success";
+        }catch (Exception ex){
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>久久微信支付成功的回调异常>>>>>>>>>>>>>>");
+            ex.printStackTrace();
+        }
+        return "";
+    }
+
 }
